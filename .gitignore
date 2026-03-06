@@ -31,3 +31,25 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# dependencies
+node_modules
+
+# build
+dist
+.quasar
+
+# environment variables
+.env
+.env.*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# editor
+.vscode

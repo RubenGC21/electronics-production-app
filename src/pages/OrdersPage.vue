@@ -343,6 +343,9 @@
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>{{ serial.serialNumber }}</q-item-label>
+                    <q-item-label caption class="text-grey-8">
+                      Producto: {{ serial.productName || '-' }}
+                    </q-item-label>
                     <q-item-label caption class="text-grey-7">
                       Agregado: {{ formatDateTime(serial.createdAt) }}
                     </q-item-label>
@@ -677,6 +680,7 @@ const orders = ref<WorkOrder[]>([]);
 interface OrderSerialItem {
   id: number;
   serialNumber: string;
+  productName?: string;
   createdAt?: string;
 }
 
@@ -908,6 +912,7 @@ async function loadSerialsForSelectedOrder() {
     selectedOrderSerials.value = serials.map((record) => ({
       id: record.id,
       serialNumber: record.serialNumber,
+      ...(record.productName ? { productName: record.productName } : {}),
       ...(record.createdAt ? { createdAt: record.createdAt } : {}),
     }));
     selectedOrderSerialPage.value = 1;

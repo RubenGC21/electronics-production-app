@@ -30,6 +30,13 @@
       :loading="loading"
       :pagination="{ rowsPerPage: 15 }"
     >
+      <template #body-cell-serialNumber="props">
+        <q-td :props="props">
+          <div>{{ props.row.serialNumber }}</div>
+          <div class="text-caption text-grey-8">Producto: {{ props.row.productName || '-' }}</div>
+        </q-td>
+      </template>
+
       <template #body-cell-createdAt="props">
         <q-td :props="props">
           {{ formatDateTime(props.row.createdAt) }}
@@ -76,7 +83,11 @@ const filteredSerialNumbers = computed(() => {
     return serialNumbers.value;
   }
 
-  return serialNumbers.value.filter((item) => item.serialNumber.toLowerCase().includes(query));
+  return serialNumbers.value.filter((item) =>
+    [item.serialNumber, item.productName || ''].some((value) =>
+      value.toLowerCase().includes(query),
+    ),
+  );
 });
 
 function formatDateTime(value?: string) {

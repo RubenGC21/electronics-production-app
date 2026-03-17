@@ -34,12 +34,41 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <q-input
+                <q-select
                   v-model="form.customerName"
                   label="Cliente *"
                   outlined
+                  use-input
+                  fill-input
+                  hide-selected
+                  input-debounce="0"
+                  :options="filteredCustomerOptions"
                   :rules="[(value) => !!value?.trim() || 'El cliente es requerido']"
-                />
+                  @filter="onCustomerFilter"
+                  @new-value="onCustomerNewValue"
+                  @input-value="onCustomerInputValue"
+                >
+                  <template #no-option>
+                    <q-item>
+                      <q-item-section class="text-grey-7">
+                        No hay coincidencias para "{{ customerInputText.trim() }}"
+                      </q-item-section>
+                    </q-item>
+                    <q-item
+                      v-if="customerInputText.trim()"
+                      clickable
+                      v-close-popup
+                      @click="addNewCustomerFromInput"
+                    >
+                      <q-item-section avatar>
+                        <q-icon name="person_add" color="primary" />
+                      </q-item-section>
+                      <q-item-section class="text-primary">
+                        Agregar nuevo cliente
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
               </div>
 
               <div class="col-12 col-md-6">
@@ -147,6 +176,7 @@ import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import OrdersPage from 'src/pages/OrdersPage.vue';
 import { uploadOrderAttachment } from 'src/services/attachmentsService';
+import { getCustomers, getOrCreateCustomer } from 'src/services/customersService';
 import { createOrder, getOrders, type OrderStatus } from 'src/services/ordersService';
 import { useSalesOrdersStore } from 'src/stores/SalesOrders';
 
@@ -156,6 +186,10 @@ const salesOrdersStore = useSalesOrdersStore();
 
 const orderFormRef = ref<QForm | null>(null);
 const existingOrderNumbers = ref<string[]>([]);
+const customerOptions = ref<string[]>([]);
+const filteredCustomerOptions = ref<string[]>([]);
+const customerInputText = ref('');
+const creatingCustomerFromSelect = ref(false);
 
 const statusOptions: { label: OrderStatus; value: OrderStatus }[] = [
   { label: 'Pendiente', value: 'Pendiente' },
@@ -218,6 +252,80 @@ async function loadExistingOrderNumbers() {
   }
 }
 
+async function loadCustomers() {
+  try {
+    const customers = await getCustomers();
+    customerOptions.value = customers.map((customer) => customer.name);
+    filteredCustomerOptions.value = [...customerOptions.value];
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'No se pudieron cargar los clientes',
+    });
+  }
+}
+
+function onCustomerFilter(value: string, update: (callbackFn: () => void) => void) {
+  customerInputText.value = value;
+  update(() => {
+    const query = value.trim().toLowerCase();
+    filteredCustomerOptions.value = !query
+      ? [...customerOptions.value]
+      : customerOptions.value.filter((customer) => customer.toLowerCase().includes(query));
+  });
+}
+
+function onCustomerNewValue(value: string, done: (val: string, mode?: 'add' | 'add-unique' | 'toggle') => void) {
+  const normalizedName = value.trim().replace(/\s+/g, ' ');
+  if (!normalizedName) {
+    done('');
+    return;
+  }
+
+  const existingOption = customerOptions.value.find(
+    (option) => option.toLowerCase() === normalizedName.toLowerCase(),
+  );
+  const finalValue = existingOption ?? normalizedName;
+
+  if (!existingOption) {
+    customerOptions.value.push(finalValue);
+    customerOptions.value.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+    filteredCustomerOptions.value = [...customerOptions.value];
+  }
+
+  done(finalValue, 'add-unique');
+}
+
+function onCustomerInputValue(value: string) {
+  customerInputText.value = value;
+}
+
+async function addNewCustomerFromInput() {
+  const customerName = customerInputText.value.trim();
+  if (!customerName || creatingCustomerFromSelect.value) {
+    return;
+  }
+
+  creatingCustomerFromSelect.value = true;
+  try {
+    const customer = await getOrCreateCustomer(customerName);
+    if (!customerOptions.value.some((name) => name.toLowerCase() === customer.name.toLowerCase())) {
+      customerOptions.value.push(customer.name);
+      customerOptions.value.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+    }
+
+    filteredCustomerOptions.value = [...customerOptions.value];
+    form.value.customerName = customer.name;
+    customerInputText.value = customer.name;
+    $q.notify({ type: 'positive', message: `Cliente agregado: ${customer.name}` });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No se pudo agregar el cliente';
+    $q.notify({ type: 'negative', message });
+  } finally {
+    creatingCustomerFromSelect.value = false;
+  }
+}
+
 async function onSubmit() {
   const valid = await orderFormRef.value?.validate();
 
@@ -226,13 +334,30 @@ async function onSubmit() {
   }
 
   try {
+    const selectedCustomerName = form.value.customerName.trim();
+    const typedCustomerName = customerInputText.value.trim();
+    const trimmedCustomerName = selectedCustomerName || typedCustomerName;
+    if (!trimmedCustomerName) {
+      $q.notify({ type: 'warning', message: 'El cliente es requerido' });
+      return;
+    }
+
+    form.value.customerName = trimmedCustomerName;
+    const customer = await getOrCreateCustomer(trimmedCustomerName);
+    if (!customerOptions.value.some((name) => name.toLowerCase() === customer.name.toLowerCase())) {
+      customerOptions.value.push(customer.name);
+      customerOptions.value.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      filteredCustomerOptions.value = [...customerOptions.value];
+    }
+
     const attachmentUrl = form.value.attachment
       ? await uploadOrderAttachment(form.value.attachment, form.value.orderNumber.trim())
       : undefined;
 
     const createdOrder = await createOrder({
       orderNumber: form.value.orderNumber.trim(),
-      customerName: form.value.customerName.trim(),
+      customerId: customer.id,
+      customerName: trimmedCustomerName,
       destination: form.value.destination,
       dueDate: form.value.dueDate,
       status: form.value.status,
@@ -258,6 +383,7 @@ function goBack() {
 
 onMounted(async () => {
   await loadExistingOrderNumbers();
+  await loadCustomers();
 });
 </script>
 

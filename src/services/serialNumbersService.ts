@@ -3,6 +3,7 @@ import { supabase } from 'src/lib/supabase';
 export interface SerialNumberRow {
   id: number;
   serial_number: string;
+  product_name?: string | null;
   work_order_id: number;
   created_at?: string;
 }
@@ -10,6 +11,7 @@ export interface SerialNumberRow {
 export interface SerialNumberRecord {
   id: number;
   serialNumber: string;
+  productName?: string;
   workOrderId: number;
   createdAt?: string;
 }
@@ -23,6 +25,7 @@ export interface ExistingSerialRegistration {
 const mapRowToSerial = (row: SerialNumberRow): SerialNumberRecord => ({
   id: row.id,
   serialNumber: row.serial_number,
+  ...(row.product_name ? { productName: row.product_name } : {}),
   workOrderId: row.work_order_id,
   ...(row.created_at ? { createdAt: row.created_at } : {}),
 });

@@ -67,6 +67,13 @@
           </q-item-section>
           <q-item-section>Números de serie</q-item-section>
         </q-item>
+
+        <q-item clickable v-ripple to="/customers" exact active-class="text-primary bg-blue-1">
+          <q-item-section avatar>
+            <q-icon name="groups" />
+          </q-item-section>
+          <q-item-section>Clientes</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 

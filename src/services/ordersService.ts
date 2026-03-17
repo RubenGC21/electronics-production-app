@@ -5,6 +5,7 @@ export type OrderStatus = 'Pendiente' | 'En Progreso' | 'Finalizado';
 export interface WorkOrderRow {
   id: number;
   order_number: string;
+  customer_id?: string | null;
   customer_name: string;
   destination: string;
   due_date: string;
@@ -16,6 +17,7 @@ export interface WorkOrderRow {
 
 export interface WorkOrder {
   id: number;
+  customerId?: string;
   orderNumber: string;
   customerName: string;
   destination: string;
@@ -27,6 +29,7 @@ export interface WorkOrder {
 
 export interface CreateOrderInput {
   orderNumber: string;
+  customerId?: string;
   customerName: string;
   destination: string;
   dueDate: string;
@@ -36,6 +39,7 @@ export interface CreateOrderInput {
 }
 
 export interface UpdateOrderInput {
+  customerId?: string | null;
   customerName?: string;
   destination?: string;
   dueDate?: string;
@@ -46,6 +50,7 @@ export interface UpdateOrderInput {
 
 const mapRowToOrder = (row: WorkOrderRow): WorkOrder => ({
   id: row.id,
+  ...(row.customer_id ? { customerId: row.customer_id } : {}),
   orderNumber: row.order_number,
   customerName: row.customer_name,
   destination: row.destination,
@@ -71,6 +76,7 @@ export async function getOrders(): Promise<WorkOrder[]> {
 export async function createOrder(order: CreateOrderInput): Promise<WorkOrder> {
   const payload = {
     order_number: order.orderNumber,
+    customer_id: order.customerId ?? null,
     customer_name: order.customerName,
     destination: order.destination,
     due_date: order.dueDate,
@@ -90,6 +96,7 @@ export async function createOrder(order: CreateOrderInput): Promise<WorkOrder> {
 
 export async function updateOrder(id: number, order: UpdateOrderInput): Promise<WorkOrder> {
   const payload: {
+    customer_id?: string | null;
     customer_name?: string;
     destination?: string;
     due_date?: string;
@@ -98,6 +105,7 @@ export async function updateOrder(id: number, order: UpdateOrderInput): Promise<
     attachment_url?: string | null;
   } = {};
 
+  if (order.customerId !== undefined) payload.customer_id = order.customerId;
   if (order.customerName !== undefined) payload.customer_name = order.customerName;
   if (order.destination !== undefined) payload.destination = order.destination;
   if (order.dueDate !== undefined) payload.due_date = order.dueDate;

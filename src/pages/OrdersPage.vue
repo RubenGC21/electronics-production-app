@@ -2,15 +2,12 @@
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-col-gutter-md q-mb-md">
       <div class="col-auto">
-        <h5 class="q-my-none">Órdenes</h5>
-      </div>
-      <div class="col-auto">
         <q-btn color="primary" label="Nueva orden" icon="add" to="/orders/new" />
       </div>
     </div>
 
-    <div v-if="!isDetailsOpen" class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-4">
+    <div v-if="!isDetailsOpen" class="row q-col-gutter-sm q-mb-md">
+      <div class="col-12 col-sm-4">
         <q-card
           flat
           class="stats-card stats-card--pending"
@@ -19,15 +16,15 @@
         >
           <q-card-section class="stats-card__content">
             <div>
-              <div class="text-subtitle2">Órdenes Pendientes</div>
-              <div class="text-h4 text-weight-bold">{{ pendingCount }}</div>
+              <div class="stats-card__label">Órdenes Pendientes</div>
+              <div class="stats-card__value">{{ pendingCount }}</div>
             </div>
-            <q-icon name="schedule" size="32px" />
+            <q-icon name="schedule" class="stats-card__icon" />
           </q-card-section>
         </q-card>
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-sm-4">
         <q-card
           flat
           class="stats-card stats-card--progress"
@@ -36,15 +33,15 @@
         >
           <q-card-section class="stats-card__content">
             <div>
-              <div class="text-subtitle2">Órdenes en progreso</div>
-              <div class="text-h4 text-weight-bold">{{ inProgressCount }}</div>
+              <div class="stats-card__label">Órdenes en progreso</div>
+              <div class="stats-card__value">{{ inProgressCount }}</div>
             </div>
-            <q-icon name="autorenew" size="32px" />
+            <q-icon name="autorenew" class="stats-card__icon" />
           </q-card-section>
         </q-card>
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-sm-4">
         <q-card
           flat
           class="stats-card stats-card--done"
@@ -53,10 +50,10 @@
         >
           <q-card-section class="stats-card__content">
             <div>
-              <div class="text-subtitle2">Órdenes finalizadas</div>
-              <div class="text-h4 text-weight-bold">{{ doneCount }}</div>
+              <div class="stats-card__label">Órdenes finalizadas</div>
+              <div class="stats-card__value">{{ doneCount }}</div>
             </div>
-            <q-icon name="task_alt" size="32px" />
+            <q-icon name="task_alt" class="stats-card__icon" />
           </q-card-section>
         </q-card>
       </div>
@@ -75,18 +72,31 @@
           @row-click="onRowClick"
         >
           <template #top-right>
-            <q-input
-              v-model="search"
-              dense
-              outlined
-              debounce="250"
-              placeholder="Buscar por número, cliente o destino"
-              style="min-width: 320px"
-            >
-              <template #append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
+            <div class="orders-search-wrap">
+              <q-btn
+                v-if="!isSearchExpanded"
+                flat
+                round
+                dense
+                icon="search"
+                aria-label="Mostrar búsqueda"
+                class="orders-search-toggle"
+                @click="openSearchInput"
+              />
+
+              <q-input
+                v-else
+                ref="searchInputRef"
+                v-model="search"
+                class="orders-search-input"
+                dense
+                outlined
+                debounce="250"
+                placeholder="Buscar por número, cliente o destino"
+                style="min-width: 320px"
+                @blur="collapseSearchIfEmpty"
+              />
+            </div>
           </template>
 
           <template #body-cell-dueDate="props">
@@ -416,11 +426,7 @@
                   class="q-pa-sm"
                 >
                   <div class="row q-col-gutter-sm evidence-multi-slide">
-                    <div
-                      v-for="evidence in slide"
-                      :key="evidence.path"
-                      class="col-4"
-                    >
+                    <div v-for="evidence in slide" :key="evidence.path" class="col-4">
                       <q-img
                         :src="evidence.signedUrl || ''"
                         ratio="1"
@@ -430,7 +436,9 @@
                         @error="onEvidenceImageError(evidence)"
                       >
                         <template #error>
-                          <div class="absolute-full flex flex-center bg-grey-3 text-grey-8 text-caption">
+                          <div
+                            class="absolute-full flex flex-center bg-grey-3 text-grey-8 text-caption"
+                          >
                             Sin vista previa
                           </div>
                         </template>
@@ -632,8 +640,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
-import type { QForm, QTableColumn } from 'quasar';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import type { QForm, QInput, QTableColumn } from 'quasar';
 import { useQuasar } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -675,6 +683,8 @@ const router = useRouter();
 
 const loadingOrders = ref(false);
 const search = ref('');
+const isSearchExpanded = ref(false);
+const searchInputRef = ref<QInput | null>(null);
 const orders = ref<WorkOrder[]>([]);
 
 interface OrderSerialItem {
@@ -792,12 +802,13 @@ const filteredOrders = computed(() => {
   const statusFilteredOrders = selectedStatus.value
     ? orders.value.filter((order) => order.status === selectedStatus.value)
     : orders.value;
+  const sortedOrders = [...statusFilteredOrders].sort((left, right) => right.id - left.id);
 
   if (!query) {
-    return statusFilteredOrders;
+    return sortedOrders;
   }
 
-  return statusFilteredOrders.filter((order) =>
+  return sortedOrders.filter((order) =>
     [order.orderNumber, order.customerName, order.destination].some((field) =>
       field.toLowerCase().includes(query),
     ),
@@ -838,16 +849,51 @@ function truncateComments(value?: string) {
   return value.length > 48 ? `${value.slice(0, 48)}...` : value;
 }
 
+async function openSearchInput() {
+  isSearchExpanded.value = true;
+  await nextTick();
+  searchInputRef.value?.focus();
+}
+
+function collapseSearchIfEmpty() {
+  if (search.value.trim()) {
+    return;
+  }
+
+  isSearchExpanded.value = false;
+}
+
 function formatDueDate(value: string) {
   const dateOnlyPattern = /^(\d{4})-(\d{2})-(\d{2})$/;
   const match = value.match(dateOnlyPattern);
 
   if (match) {
-    return `${match[3]}/${match[2]}/${match[1]}`;
+    const [, year, month, day] = match;
+    const monthName = new Intl.DateTimeFormat('es-MX', {
+      month: 'long',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(Number(year), Number(month) - 1, Number(day))));
+
+    return `${Number(day)} - ${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} - ${year}`;
   }
 
   const parsedDate = new Date(value);
-  return Number.isNaN(parsedDate.getTime()) ? value : parsedDate.toLocaleDateString('es-MX');
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value;
+  }
+
+  const formattedDate = new Intl.DateTimeFormat('es-MX', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(parsedDate);
+
+  const [day, monthName, year] = formattedDate.replace(/,/g, '').split(' ');
+  if (!day || !monthName || !year) {
+    return formattedDate;
+  }
+
+  return `${day}-${monthName.charAt(0).toUpperCase()}${monthName.slice(1)}-${year}`;
 }
 
 function formatDateTime(value?: string) {
@@ -1347,9 +1393,9 @@ watch(serialsPerPage, () => {
 
 <style scoped>
 .stats-card {
-  border-radius: 16px;
+  border-radius: 14px;
   color: #fff;
-  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.16);
+  box-shadow: 0 8px 18px rgba(16, 24, 40, 0.14);
   cursor: pointer;
   transition:
     transform 0.18s ease,
@@ -1360,7 +1406,24 @@ watch(serialsPerPage, () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 110px;
+  min-height: 88px;
+  padding: 14px 16px;
+}
+
+.stats-card__label {
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.stats-card__value {
+  margin-top: 4px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stats-card__icon {
+  font-size: 26px;
 }
 
 .stats-card--pending {
@@ -1377,12 +1440,68 @@ watch(serialsPerPage, () => {
 
 .stats-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 26px rgba(16, 24, 40, 0.2);
+  box-shadow: 0 12px 22px rgba(16, 24, 40, 0.18);
 }
 
 .stats-card--active {
   outline: 3px solid rgba(255, 255, 255, 0.85);
   outline-offset: -3px;
+}
+
+@media (max-width: 599px) {
+  .orders-search-input {
+    min-width: 100% !important;
+  }
+
+  .stats-card__content {
+    min-height: 80px;
+    padding: 12px 14px;
+  }
+
+  .stats-card__label {
+    font-size: 0.84rem;
+  }
+
+  .stats-card__value {
+    font-size: 1.55rem;
+  }
+
+  .stats-card__icon {
+    font-size: 22px;
+  }
+}
+
+:deep(.orders-search-input .q-field__control) {
+  min-height: 46px;
+  border-radius: 14px;
+}
+
+:deep(.orders-search-toggle) {
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(219, 229, 239, 0.92);
+}
+
+.orders-search-wrap {
+  display: flex;
+  justify-content: flex-end;
+  width: min-content;
+  min-width: 0;
+}
+
+:deep(.orders-search-input .q-field__native) {
+  min-height: 46px;
+  font-size: 0.92rem;
+}
+
+:deep(.q-table__top .q-table__control) {
+  width: auto;
+  min-width: 0;
+}
+
+:deep(.q-table__top .q-table__control > div) {
+  width: min-content;
+  min-width: 0;
 }
 
 .details-panel {

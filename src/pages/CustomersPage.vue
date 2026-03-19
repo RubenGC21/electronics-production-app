@@ -1,7 +1,6 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
-      <h5 class="q-my-none">Clientes</h5>
       <div class="row q-gutter-sm">
         <q-btn color="primary" icon="add" label="Agregar" @click="openAddCustomerDialog" />
         <q-btn flat icon="refresh" label="Recargar" @click="loadCustomers" />

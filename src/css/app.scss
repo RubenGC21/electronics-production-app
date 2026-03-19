@@ -1,1 +1,235 @@
-// app global css in SCSS form
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --app-bg: #f3f6fb;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-strong: #ffffff;
+  --surface-muted: #eef3f8;
+  --line-soft: #dbe5ef;
+  --line-strong: #cfd9e5;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-soft: #94a3b8;
+  --accent-soft: #dfeaf7;
+  --shadow-soft: 0 18px 44px rgba(148, 163, 184, 0.14);
+  --radius-card: 26px;
+  --radius-field: 18px;
+}
+
+html,
+body,
+#q-app {
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top left, rgba(223, 234, 247, 0.7), transparent 24%),
+    linear-gradient(180deg, #f8fafc 0%, var(--app-bg) 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#q-app {
+  color: var(--text-main);
+}
+
+.q-page {
+  padding: 28px;
+}
+
+.q-page h4,
+.q-page h5,
+.q-page h6 {
+  margin: 0;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
+}
+
+.q-page h5 {
+  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+  font-weight: 800;
+}
+
+.q-page .text-h6,
+.q-page .text-subtitle1,
+.q-page .text-subtitle2 {
+  color: var(--text-main);
+}
+
+.q-page .text-caption,
+.q-page .text-grey-7,
+.q-page .text-grey-8 {
+  color: var(--text-muted) !important;
+}
+
+.q-btn {
+  border-radius: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.q-btn.bg-primary,
+.q-btn--standard.bg-primary,
+.q-btn--unelevated.bg-primary {
+  box-shadow: 0 18px 34px rgba(15, 98, 201, 0.22);
+}
+
+.q-btn--outline,
+.q-btn--flat {
+  box-shadow: none;
+}
+
+.q-card {
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(219, 229, 239, 0.85);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.q-card__section--vert {
+  padding: 24px 26px;
+}
+
+.q-field--outlined .q-field__control {
+  min-height: 58px;
+  border-radius: var(--radius-field);
+  background: rgba(255, 255, 255, 0.96);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.q-field--outlined .q-field__control::before {
+  border: 1px solid var(--line-soft);
+}
+
+.q-field--outlined .q-field__control:hover::before {
+  border-color: #bfd0e3;
+}
+
+.q-field--focused .q-field__control::before,
+.q-field--focused .q-field__control::after {
+  border-color: #9fc0e8 !important;
+}
+
+.q-field__native,
+.q-field__input,
+.q-field__prefix,
+.q-field__suffix {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.q-field__label {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.q-select__dropdown-icon,
+.q-field__append {
+  color: var(--text-soft);
+}
+
+.q-table__container {
+  overflow: hidden;
+  border: 1px solid rgba(219, 229, 239, 0.85);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 20px 45px rgba(148, 163, 184, 0.14);
+}
+
+.q-table__top,
+.q-table__bottom {
+  padding: 18px 22px;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.q-table thead tr {
+  background: #f7fafc;
+}
+
+.q-table thead th {
+  height: 54px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7b8a9f;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.q-table tbody td {
+  height: 68px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.q-table tbody tr:hover {
+  background: rgba(239, 244, 251, 0.86);
+}
+
+.q-table__card {
+  color: var(--text-main);
+}
+
+.q-table__grid-content,
+.q-table__middle {
+  background: transparent;
+}
+
+.q-pagination .q-btn {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 12px;
+}
+
+.q-menu .q-list,
+.q-dialog .q-card {
+  border-radius: 24px;
+}
+
+.rounded-borders {
+  border-radius: 20px !important;
+}
+
+.bg-grey-1 {
+  background: rgba(248, 250, 252, 0.95) !important;
+}
+
+@media (max-width: 1023px) {
+  .q-page {
+    padding: 22px;
+  }
+
+  .q-card__section--vert {
+    padding: 22px;
+  }
+
+  .q-table thead th {
+    font-size: 0.76rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .q-page {
+    padding: 16px;
+  }
+
+  .q-page h5 {
+    font-size: 1.45rem;
+  }
+
+  .q-table__top,
+  .q-table__bottom {
+    padding: 14px 16px;
+  }
+
+  .q-card__section--vert {
+    padding: 18px;
+  }
+}

@@ -1,7 +1,6 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
-      <h5 class="q-my-none">Números de serie</h5>
       <q-btn flat icon="refresh" label="Recargar" @click="loadSerials" />
     </div>
 

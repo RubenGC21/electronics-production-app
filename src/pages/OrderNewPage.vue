@@ -6,36 +6,30 @@
 
     <div class="order-new-page__overlay q-pa-md">
       <q-card flat class="order-new-page__form order-form-card">
-        <q-card-section class="order-form-card__header row items-center justify-between">
-          <div class="row items-center no-wrap q-gutter-sm">
-            <q-avatar color="primary" text-color="white" icon="assignment_add" />
-            <div>
-              <div class="text-h6 text-weight-bold">Nueva orden</div>
-              <div class="text-caption text-grey-7">
-                Captura la información para registrar la orden
-              </div>
-            </div>
-          </div>
+        <q-card-section class="order-form-card__header row items-center justify-end">
           <q-btn flat color="primary" icon="close" round @click="goBack" />
         </q-card-section>
 
         <q-separator />
 
         <q-card-section class="order-form-card__body">
-          <q-form ref="orderFormRef" class="q-gutter-lg" @submit.prevent="onSubmit">
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-6">
+          <q-form ref="orderFormRef" class="order-form-grid q-gutter-md" @submit.prevent="onSubmit">
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-4">
                 <q-input
                   v-model="form.orderNumber"
+                  class="order-number-input"
+                  dense
                   label="Número de orden *"
                   outlined
                   :rules="orderNumberRules"
                 />
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-4">
                 <q-select
                   v-model="form.customerName"
+                  dense
                   label="Cliente *"
                   outlined
                   use-input
@@ -71,9 +65,10 @@
                 </q-select>
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-2">
                 <q-select
                   v-model="form.destination"
+                  dense
                   label="Destino *"
                   outlined
                   emit-value
@@ -101,9 +96,10 @@
                 </q-select>
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-2">
                 <q-input
                   v-model="form.dueDate"
+                  dense
                   label="Fecha compromiso *"
                   type="date"
                   outlined
@@ -113,7 +109,7 @@
             </div>
 
             <div class="status-block">
-              <div class="text-subtitle2 q-mb-sm">Estatus *</div>
+              <div class="text-subtitle2 status-block__label">Estatus *</div>
               <q-btn-toggle
                 v-model="form.status"
                 spread
@@ -127,31 +123,40 @@
               />
             </div>
 
-            <q-input
-              v-model="form.comments"
-              label="Comentarios"
-              outlined
-              type="textarea"
-              autogrow
-            />
+            <div class="row q-col-gutter-sm">
+              <div class="col-12 col-md-7">
+                <q-input
+                  v-model="form.comments"
+                  dense
+                  label="Comentarios"
+                  outlined
+                  type="textarea"
+                  autogrow
+                  :input-style="{ minHeight: '68px' }"
+                />
+              </div>
 
-            <q-file
-              v-model="form.attachment"
-              label="Adjuntar archivo PDF"
-              outlined
-              clearable
-              use-chips
-              accept=".pdf,application/pdf"
-              max-files="1"
-              :rules="pdfRules"
-              hint="Solo se permiten archivos PDF."
-            >
-              <template #prepend>
-                <q-icon name="attach_file" />
-              </template>
-            </q-file>
+              <div class="col-12 col-md-5">
+                <q-file
+                  v-model="form.attachment"
+                  dense
+                  label="Adjuntar archivo PDF"
+                  outlined
+                  clearable
+                  use-chips
+                  accept=".pdf,application/pdf"
+                  max-files="1"
+                  :rules="pdfRules"
+                  hint="Solo se permiten archivos PDF."
+                >
+                  <template #prepend>
+                    <q-icon name="attach_file" />
+                  </template>
+                </q-file>
+              </div>
+            </div>
 
-            <div class="row justify-end q-gutter-sm q-pt-sm">
+            <div class="row justify-end q-gutter-sm">
               <q-btn flat no-caps label="Cancelar" @click="goBack" />
               <q-btn
                 color="primary"
@@ -402,12 +407,13 @@ onMounted(async () => {
   inset: 0;
   display: flex;
   align-items: flex-start;
-  justify-content: flex-end;
+  justify-content: center;
   background: rgba(241, 245, 249, 0.54);
 }
 
 .order-new-page__form {
   width: 100%;
+  max-width: 1240px;
 }
 
 .order-form-card {
@@ -418,22 +424,43 @@ onMounted(async () => {
 
 .order-form-card__header {
   background: linear-gradient(180deg, #ffffff, #f8fbff);
+  padding: 10px 12px;
 }
 
 .order-form-card__body {
   background: #ffffff;
+  padding: 16px 18px 18px;
+}
+
+.order-form-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-block__label {
+  margin-bottom: 8px;
+}
+
+.order-number-input :deep(.q-field__control) {
+  min-height: 40px;
 }
 
 .status-block {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
 }
 
 @media (min-width: 1024px) {
   .order-new-page__form {
-    width: 50%;
+    width: min(100%, 1180px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .order-form-card__body {
+    padding: 14px;
   }
 }
 </style>

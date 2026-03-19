@@ -11,15 +11,12 @@
       <div class="col-12 col-md-6">
         <q-input
           v-model="search"
+          class="search-field"
           dense
           outlined
           debounce="250"
-          placeholder="Buscar cliente"
-        >
-          <template #append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+          label="Buscar cliente"
+        />
       </div>
     </div>
 

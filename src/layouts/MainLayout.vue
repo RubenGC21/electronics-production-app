@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header class="modern-header">
+    <q-header class="modern-header" @click="collapseDrawerOutside">
       <q-toolbar class="app-toolbar q-px-sm q-py-xs">
         <div class="toolbar-tab-title">{{ currentSectionTitle }}</div>
         <q-space />
@@ -88,7 +88,7 @@
       </div>
     </q-drawer>
 
-    <q-page-container class="app-page-container">
+    <q-page-container class="app-page-container" @click="collapseDrawerOutside">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -130,6 +130,14 @@ const currentSectionTitle = computed(() => {
 function toggleLeftDrawer() {
   isDrawerMini.value = !isDrawerMini.value;
   leftDrawerOpen.value = true;
+}
+
+function collapseDrawerOutside() {
+  if (isDrawerMini.value) {
+    return;
+  }
+
+  isDrawerMini.value = true;
 }
 </script>
 

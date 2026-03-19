@@ -133,6 +133,20 @@ body {
   color: var(--text-soft);
 }
 
+.search-field .q-field__label {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.search-field .q-field__control {
+  min-height: 40px;
+}
+
+.search-field .q-field__native,
+.search-field .q-field__input {
+  min-height: 40px;
+}
+
 .q-table__container {
   overflow: hidden;
   border: 1px solid rgba(219, 229, 239, 0.85);

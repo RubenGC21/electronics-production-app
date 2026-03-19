@@ -1,9 +1,6 @@
 <template>
   <q-page class="q-pa-md">
     <div class="row items-center justify-between q-col-gutter-md q-mb-md">
-      <div class="col-auto">
-        <q-btn color="primary" label="Nueva orden" icon="add" to="/orders/new" />
-      </div>
     </div>
 
     <div v-if="!isDetailsOpen" class="row q-col-gutter-sm q-mb-md">
@@ -71,31 +68,42 @@
           :pagination="{ rowsPerPage: 10 }"
           @row-click="onRowClick"
         >
-          <template #top-right>
-            <div class="orders-search-wrap">
+          <template #top>
+            <div class="orders-table-top full-width">
               <q-btn
-                v-if="!isSearchExpanded"
-                flat
-                round
-                dense
-                icon="search"
-                aria-label="Mostrar búsqueda"
-                class="orders-search-toggle"
-                @click="openSearchInput"
+                color="primary"
+                label="Nueva orden"
+                icon="add"
+                no-caps
+                class="orders-new-button"
+                to="/orders/new"
               />
 
-              <q-input
-                v-else
-                ref="searchInputRef"
-                v-model="search"
-                class="orders-search-input"
-                dense
-                outlined
-                debounce="250"
-                placeholder="Buscar por número, cliente o destino"
-                style="min-width: 320px"
-                @blur="collapseSearchIfEmpty"
-              />
+              <div class="orders-search-wrap">
+                <q-btn
+                  v-if="!isSearchExpanded"
+                  flat
+                  round
+                  dense
+                  icon="search"
+                  aria-label="Mostrar búsqueda"
+                  class="orders-search-toggle"
+                  @click="openSearchInput"
+                />
+
+                <q-input
+                  v-else
+                  ref="searchInputRef"
+                  v-model="search"
+                  class="orders-search-input search-field"
+                  dense
+                  outlined
+                  debounce="250"
+                  label="Buscar por número, cliente o destino"
+                  style="min-width: 320px"
+                  @blur="collapseSearchIfEmpty"
+                />
+              </div>
             </div>
           </template>
 
@@ -1472,8 +1480,7 @@ watch(serialsPerPage, () => {
 }
 
 :deep(.orders-search-input .q-field__control) {
-  min-height: 46px;
-  border-radius: 14px;
+  min-height: 40px;
 }
 
 :deep(.orders-search-toggle) {
@@ -1482,16 +1489,28 @@ watch(serialsPerPage, () => {
   border: 1px solid rgba(219, 229, 239, 0.92);
 }
 
+.orders-table-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .orders-search-wrap {
   display: flex;
+  align-items: center;
+  gap: 10px;
   justify-content: flex-end;
   width: min-content;
   min-width: 0;
 }
 
+.orders-new-button {
+  white-space: nowrap;
+}
+
 :deep(.orders-search-input .q-field__native) {
-  min-height: 46px;
-  font-size: 0.92rem;
+  min-height: 40px;
 }
 
 :deep(.q-table__top .q-table__control) {
